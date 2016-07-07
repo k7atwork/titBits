@@ -1,0 +1,1 @@
+javascript:function%20E(){winid=window.open('http://<webserver>:<port>/psc/<env_name>/EMPLOYEE/HRMS/c/<menuName>.<compName>.GBL?Page=<pageName>&<srchRecKeyNameValuePairs>','_blank','status=no,directories=no,location=no,resizable=no,menubar=no,width=800,height=1000,titlebar=no,toolbar=no,scrollbars=yes');}E();
