@@ -1,0 +1,84 @@
+method Debug
+   
+   Local number &i, &j, &k, &x, &y;
+   Local string &S1, &ErrTxt;
+   
+   Local ApiObject &PROPINFO_0, &PROPITEM_0, &PROPINFO_1, &PROPITEM_1, &PROPINFO_2, &PROPITEM_2, &Coll_1, &Coll_2;
+   
+   &PROPINFO_0 = %This.oComponentInterface.PropertyInfoCollection;
+   
+   For &i = 1 To &PROPINFO_0.Count
+      
+      &PROPITEM_0 = &PROPINFO_0.Item(&i);
+      
+      If (&PROPITEM_0.IsCollection) Then
+         
+         &PROPINFO_1 = &PROPITEM_0.PropertyInfoCollection;
+         
+         &Coll_1 = %This.oComponentInterface.GetPropertyByName(&PROPITEM_0.Name);
+         
+         For &x = 1 To &Coll_1.Count
+            For &j = 1 To &PROPINFO_1.Count
+               
+               &PROPITEM_1 = &PROPINFO_1.Item(&j);
+               
+               &S1 = &PROPITEM_0.Name | "." | &PROPITEM_1.Name;
+               
+               If (&PROPITEM_1.IsCollection) Then
+                  
+                  &PROPINFO_2 = &PROPITEM_1.PropertyInfoCollection;
+                  
+                  &Coll_2 = &Coll_1.Item(&x).GetPropertyByName(&PROPITEM_1.Name);
+                  
+                  For &y = 1 To &Coll_2.Count
+                     For &k = 1 To &PROPINFO_2.Count
+                        &PROPITEM_2 = &PROPINFO_2.Item(&k);
+                        &S1 = &PROPITEM_0.Name | "." | &PROPITEM_1.Name | "." | &PROPITEM_2.Name;
+                        %This.DebugDisplay(" > > ", &PROPITEM_1.Name, &PROPITEM_2.Name, &Coll_2.Item(&y));
+                     End-For;
+                  End-For;
+                  
+               Else
+                  %This.DebugDisplay(" > ", &PROPITEM_0.Name, &PROPITEM_1.Name, &Coll_1.Item(&x));
+               End-If; /* &PROPITEM_1 */
+               
+            End-For; /*&PROPINFO_1*/
+         End-For;
+         
+      Else
+         %This.DebugDisplay("", "ROOT", &PROPITEM_0.Name, %This.oComponentInterface);
+      End-If; /* &PROPITEM_0 */
+      
+   End-For; /* &PROPINFO_0 */
+   
+end-method;
+
+
+method DebugDisplay
+   /+ &txt as String, +/
+   /+ &parentColl as String, +/
+   /+ &propName as String, +/
+   /+ &parentItem as ApiObject +/
+   
+   
+   If Not &arrInitialised Then
+      
+      &arrRecFld = CreateArrayRept("", 0);
+      
+      Local SQL &Sql = CreateSQL("SELECT STRING_TEXT || '.' || STRING_ID FROM PS_STRINGS_TBL WHERE PROGRAM_ID='APPOINT'");
+      
+      Local string &recfld;
+      
+      While &Sql.Fetch(&recfld)
+         &arrRecFld.Push(&recfld);
+      End-While;
+      
+      &arrInitialised = True;
+      
+   End-If;
+   
+   If &arrRecFld.Find((&parentColl | "." | &propName)) > 0 Then
+      MessageBox(0, "", 0, 0, &txt | &parentColl | "." | &propName | " = " | &parentItem.GetPropertyByName(&propName));
+   End-If;
+   
+end-method;
