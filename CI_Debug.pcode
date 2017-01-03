@@ -1,9 +1,36 @@
+class DebugCI
+   method DebugCI(&CItoDebug As ApiObject, &progID As string);
+   
+   method Debug();
+   
+private
+   
+   instance ApiObject &oComponentInterface;
+   instance string &programID;
+   
+   instance array of string &arrRecFld;
+   instance boolean &arrInitialised;
+   
+   method DebugDisplay(&txt As string, &parentColl As string, &propName As string, &parentItem As ApiObject);
+   
+end-class;
+
+method DebugCI
+   /+ &CItoDebug as ApiObject, +/
+   /+ &progID as String +/
+   
+   %This.oComponentInterface = &CItoDebug;
+   %This.programID = &progID;
+   
+end-method;
+
 method Debug
    
-   Local number &i, &j, &k, &x, &y;
+   Local number &i, &j, &k, &l, &x, &y, &z;
    Local string &S1, &ErrTxt;
    
    Local ApiObject &PROPINFO_0, &PROPITEM_0, &PROPINFO_1, &PROPITEM_1, &PROPINFO_2, &PROPITEM_2, &Coll_1, &Coll_2;
+   Local ApiObject &PROPINFO_3, &PROPITEM_3, &Coll_3;
    
    &PROPINFO_0 = %This.oComponentInterface.PropertyInfoCollection;
    
@@ -32,9 +59,29 @@ method Debug
                   
                   For &y = 1 To &Coll_2.Count
                      For &k = 1 To &PROPINFO_2.Count
+                        
                         &PROPITEM_2 = &PROPINFO_2.Item(&k);
-                        &S1 = &PROPITEM_0.Name | "." | &PROPITEM_1.Name | "." | &PROPITEM_2.Name;
-                        %This.DebugDisplay(" > > ", &PROPITEM_1.Name, &PROPITEM_2.Name, &Coll_2.Item(&y));
+                        
+                        If (&PROPITEM_2.IsCollection) Then
+                           
+                           &PROPINFO_3 = &PROPITEM_2.PropertyInfoCollection;
+                           
+                           &Coll_3 = &Coll_2.Item(&y).GetPropertyByName(&PROPITEM_2.Name);
+                           
+                           For &z = 1 To &Coll_3.Count
+                              For &l = 1 To &PROPINFO_3.Count
+                                 
+                                 &PROPITEM_3 = &PROPINFO_3.Item(&l);
+                                 %This.DebugDisplay(" > > ", &PROPITEM_2.Name, &PROPITEM_3.Name, &Coll_3.Item(&z));
+                                 
+                              End-For;
+                           End-For;
+                           
+                        Else
+                           &S1 = &PROPITEM_0.Name | "." | &PROPITEM_1.Name | "." | &PROPITEM_2.Name;
+                           %This.DebugDisplay(" > > ", &PROPITEM_1.Name, &PROPITEM_2.Name, &Coll_2.Item(&y));
+                        End-If;
+                        
                      End-For;
                   End-For;
                   
@@ -65,7 +112,7 @@ method DebugDisplay
       
       &arrRecFld = CreateArrayRept("", 0);
       
-      Local SQL &Sql = CreateSQL("SELECT STRING_TEXT || '.' || STRING_ID FROM PS_STRINGS_TBL WHERE PROGRAM_ID='APPOINT'");
+      Local SQL &Sql = CreateSQL("SELECT STRING_TEXT || '.' || STRING_ID FROM PS_STRINGS_TBL WHERE PROGRAM_ID=:1", %This.programID);
       
       Local string &recfld;
       
