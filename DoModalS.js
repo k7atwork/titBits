@@ -45,3 +45,9 @@ HTML Definition- VFWA_WELCOME_MSG_MODAL_SCRIPT
   submitAction_win%Bind(:1)(document.win%Bind(:1),'G_FORM_VFWA_WRK_HRS_WELCOME_DISPLY', window.event);
 
 </script>
+
+-----------------------------------------------
+G_FORM_VFWA_WRK.HRS_WELCOME_DISPLY FieldChange
+-----------------------------------------------
+
+DoModalS(Page.VFWA_WELCOME_SP, " ", 600, 500, 0);
