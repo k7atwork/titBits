@@ -14,6 +14,15 @@ method prepareModalWinScript
    
    If &siteName_split.Len > 1 Then
       &instance = &siteName_split [&siteName_split.Len];
+
+      try
+         If Value(&instance) > 0 Then
+            /* do nothing, just Ignore */
+         End-If;
+      catch Exception &ex
+         &instance = "0";
+      end-try;
+         
    End-If;
    
    G_FORM_VFWA_WRK.HRS_HTMLAREA.Value = GetHTMLText(HTML.VFWA_WELCOME_MSG_MODAL_SCRIPT, &instance);
