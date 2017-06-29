@@ -13,11 +13,11 @@ function getElementsStartsWithId( id )
   return elements;
 }
 
+function rowFormat() 
+{
 var rows = getElementsStartsWithId('trG_FORM_VFWA_WS');
-
 for (i = 0; i < rows.length; i++) 
 {
-
 var td = rows[i].getElementsByTagName('TD');
 
   if ( td[2].innerHTML.substr(1,6) == '&nbsp;' )
@@ -25,6 +25,13 @@ var td = rows[i].getElementsByTagName('TD');
     var td0 = td[0].setAttribute("style","border-right-width:0px;");
     var td1 = td[1].setAttribute("style","border-right-width:0px;");
   }
- 
 }
+}
+
+// Call inLine
+rowFormat();
+
+// Call Onload
+window.onload=function(){rowFormat();};
+
 </script>
