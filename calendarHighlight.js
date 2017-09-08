@@ -1,3 +1,5 @@
+// HTML.CALNDR_DT_HIGHLIGHT_SCRIPT_UOA
+
 function highlightDates()
 {
 
