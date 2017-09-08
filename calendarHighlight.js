@@ -37,10 +37,10 @@ function highlightDates()
 
         if (j == day2highlight) 
         {
-          if (dates.innerHTML.substring(1,5) != 'nbsp')
-          {  dates.style.cssText += ' background-color:yellow;'; }
-		  else
+          if (dates.innerHTML.indexOf('nbsp') != -1)
           {  dates.style.cssText += ' background-color:white;'; }
+		  else
+          {  dates.style.cssText += ' background-color:yellow;'; }
         }
     }
   }
