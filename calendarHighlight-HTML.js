@@ -10,6 +10,6 @@ scriptElement.innerText = '';
 
 document.getElementsByTagName('head')[0].appendChild(scriptElement);
 
-var calprompt = document.getElementById('UOA_FWA_SPK_WRK_BEGIN_DT$prompt').href += ' highlightDates();';
+var calprompt = document.getElementById('UOA_FWA_SPK_WRK_BEGIN_DT$prompt').href += ' highlightDates(%BIND(:2));';
 
 </script>
