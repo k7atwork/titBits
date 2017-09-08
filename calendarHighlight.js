@@ -3,6 +3,8 @@
 function highlightDates()
 {
 
+  var day2highlight = arguments[0];
+
   var calMonthDates = document.getElementById('bodyCalendar').getElementsByTagName('tbody')[0];
   var calWeeks = calMonthDates.getElementsByTagName('tr');
 
@@ -16,7 +18,7 @@ function highlightDates()
     {
         var dates = weekDates[j];
 
-        if (j == 2) 
+        if (j == day2highlight) 
         {
           if (dates.innerHTML.substring(1,5) != 'nbsp')
           {  dates.style.cssText += ' background-color:yellow;'; }
@@ -32,11 +34,11 @@ function highlightDates()
 var prevmonth = tailCalendarRow.getElementsByTagName('td')[0];
 
 if (prevmonth.getElementsByTagName('a')[0].href.indexOf('highlightDates()') == -1)
-prevmonth.getElementsByTagName('a')[0].href += " highlightDates();";
+prevmonth.getElementsByTagName('a')[0].href += " highlightDates(" + day2highlight +");";
   
 var nextmonth = tailCalendarRow.getElementsByTagName('td')[5];
 
 if (nextmonth.getElementsByTagName('a')[0].href.indexOf('highlightDates()') == -1)
-nextmonth.getElementsByTagName('a')[0].href += " highlightDates();";
+nextmonth.getElementsByTagName('a')[0].href += " highlightDates(" + day2highlight +");";
 
 }
