@@ -10,7 +10,12 @@
 
   document.getElementsByTagName('head')[0].appendChild(scriptElement);
 
-  var calprompt1 = document.getElementById('UOA_FWA_SPK_WRK_BEGIN_DT$prompt').href += ' highlightDates(%BIND(:2));';
-  var calprompt2 = document.getElementById('UOA_FWA_SPK_WRK_END_DT$prompt').href += ' highlightDates(%BIND(:2)+4);';
+//  var calprompt1 = document.getElementById('G_FORM_VFWA_BEGIN_DT$prompt').href += ' highlightDates(%BIND(:2));';
+  var calprompt1 = document.getElementById('G_FORM_VFWA_BEGIN_DT$prompt');
+  if (calprompt1 != null) calprompt1.href += ' highlightDates(%BIND(:2));';
+
+//  var calprompt2 = document.getElementById('G_FORM_VFWA_END_DT$prompt').href += ' highlightDates(%BIND(:2)+4);';
+  var calprompt2 = document.getElementById('G_FORM_VFWA_END_DT$prompt');
+  if (calprompt2 != null) calprompt2.href += ' highlightDates(%BIND(:2)+4);';
 
 </script>
