@@ -82,7 +82,7 @@ function highlightDates()
           {  dates.style.cssText += ' background-color:white;'; }
 		  else
           {  
-             if (checkMondayAfterPay(dates) == 0)
+             if (((checkMondayAfterPay(dates) == 0) && j == 2) || ((checkPayDay(dates) == 0) && j == 6))
              dates.style.cssText += ' background-color:yellow;'; 
 			 else
              dates.style.cssText += ' background-color:white;';
