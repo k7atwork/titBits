@@ -1,5 +1,43 @@
 // HTML.CALNDR_DT_HIGHLIGHT_SCRIPT_UOA
 
+function checkPayDay(dateElement)
+{
+
+  var refMondayAfterPay=new Date(2016, 3, 1);
+
+  var daytocheck=dateElement.getElementsByTagName('a')[0].innerHTML;
+
+  var checkDate = new Date(PTYear.value, PTMonth.value, daytocheck);
+
+  var hoursDiff = new Date(+checkDate).setHours(12) - new Date(+refMondayAfterPay).setHours(12);
+
+  return ((Math.round(hoursDiff/8.64e7))%14);
+
+}
+
+function checkMondayAfterPay(dateElement)
+{
+
+  var refMondayAfterPay=new Date(2016, 3, 4);
+
+  var daytocheck=dateElement.getElementsByTagName('a')[0].innerHTML;
+
+  var checkDate = new Date(PTYear.value, PTMonth.value, daytocheck);
+// alert(checkDate.toDateString());
+
+//  var t2 = checkDate.getTime();
+//  var t1 = refMondayAfterPay.getTime();
+
+//  var daysDiff = parseInt((t2-t1)/(24*3600*1000));
+//  var weeksDiff = parseInt((t2-t1)/(24*3600*1000*7));
+  var hoursDiff = new Date(+checkDate).setHours(12) - new Date(+refMondayAfterPay).setHours(12);
+
+//  return ((daysDiff)%14); 
+//  return ((weeksDiff)%2);
+  return ((Math.round(hoursDiff/8.64e7))%14);
+
+}
+
 function highlightDates()
 {
 
@@ -22,6 +60,7 @@ function highlightDates()
   if (PTYear.getAttribute('onchange').indexOf('highlightDates(') == -1)
   PTYear.setAttribute('onchange',PTYear.getAttribute('onchange') + "; highlightDates(" + day2highlight +");");
 
+
 <!--  Body Calendar -->
 
   var calMonthDates = document.getElementById('bodyCalendar').getElementsByTagName('tbody')[0];
@@ -42,10 +81,16 @@ function highlightDates()
           if (dates.innerHTML.indexOf('nbsp') != -1)
           {  dates.style.cssText += ' background-color:white;'; }
 		  else
-          {  dates.style.cssText += ' background-color:yellow;'; }
+          {  
+             if (checkMondayAfterPay(dates) == 0)
+             dates.style.cssText += ' background-color:yellow;'; 
+			 else
+             dates.style.cssText += ' background-color:white;';
+          }
         }
     }
   }
+
 
 <!--  Tail Calendar -->
 
