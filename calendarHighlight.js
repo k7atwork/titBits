@@ -1,4 +1,4 @@
-// HTML.CALNDR_DT_HIGHLIGHT_SCRIPT_UOA
+// HTML.CALNDR_DT_HIGHLIGHT_SCRIPT
 
 function checkPayDay(dateElement)
 {
