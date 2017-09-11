@@ -1,4 +1,4 @@
-// HTML.CALNDR_DT_HIGHLIGHT_HTML_UOA
+// HTML.CALNDR_DT_HIGHLIGHT_HTML
 
 <script type="text/javascript">
 
