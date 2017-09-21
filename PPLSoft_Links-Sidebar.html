@@ -1,10 +1,92 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
-  <title>Titleholder New - Guest</title>
+  <title>PPLSoft Links</title>
+  <style>
+  .button 
+{
+display: inline-block;position: relative;margin: 4px;padding: 7px 20px;
+text-align: center;
+align=center;
+text-decoration: none;font: bold 14px/25px Arial, sans-serif;border-bottom: none!important; 
+text-shadow: 1px 1px 1px rgba(255,255,255, .22);	
+-webkit-border-radius: 4px;	-moz-border-radius: 4px;	border-radius: 4px;	
+-webkit-box-shadow: 1px 1px 1px rgba(0,0,0, .29), inset 1px 1px 1px rgba(255,255,255, .44);	
+-moz-box-shadow: 1px 1px 1px rgba(0,0,0, .29), inset 1px 1px 1px rgba(255,255,255, .44);	
+box-shadow: 1px 1px 1px rgba(0,0,0, .29), inset 1px 1px 1px rgba(255,255,255, .44);	
+-webkit-transition: all 0.15s ease;	
+-moz-transition: all 0.15s ease;	
+-o-transition: all 0.15s ease;	
+-ms-transition: all 0.15s ease;	transition: all 0.15s ease;
+}
+
+a.button img {border:none;zoom: 1;} 
+a.button.button-blue {color: #fff;background: none repeat scroll 0 0 #005A9C;border: 1px solid #005A9C!important;} 
+a.button.button-green {color: #fff;background: none repeat scroll 0 0 #005A5C;border: 1px solid #005A9C!important;}
+a.button:link {color: #fff;text-decoration:none} 
+a.button.button-blue:hover {color: #fff;background: none repeat scroll 0 0 #2478be;border: 1px solid #2478be!important;}
+a.button.button-green:hover {color: #fff;background: none repeat scroll 0 0 #24787A;border: 1px solid #24787A!important;}
+
+.ps-button{
+background: #73c998; 
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#79cc9c), color-stop(100%,#73c998));
+padding:0.3em  1em 0.3em 1em !important;
+font-size:1.2em;   
+border-radius: 0.25em;
+margin:0;
+color:#000000;
+border:1px inset transparent;
+box-shadow:0px 8px 10px #BDE6CF inset, 3px 3px 3px #000000;
+font-weight:normal;
+text-shadow:0px 1px 0px #BDE6CF;
+box-sizing:content-box;
+}
+
+a.ps-button:link {color: #000;text-decoration:none} 
+a.ps-button:hover {color: #FFF;background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#793F6D), color-stop(100%,#AC2B2A));border: 1px solid #24787A!important;}
+
+.ps_text_header {
+font-family: Arial, Helvetica, sans-serif;
+font-size: 25px;
+font-weght:bold;
+color: #FFFFFF;
+text-shadow: 3px 3px 3px #000000;
+width:130px; 
+display:inline-block;
+padding-bottom:14px;
+text-align:left;
+}
+
+#top, #bottom, #left, #right {background: #2478be;position: fixed;}
+	#left, #right {top: 0; bottom: 0;	width: 5px;}
+		#left { left: 0; }
+		#right { right: 0; }
+		
+	#top, #bottom {left: 0; right: 0; height: 5px;	}
+		#top { top: 0; }
+		#bottom { bottom: 0; }
+
+  </style>
   </head>
-  <body>
-   <br/><a href="javascript:function%20E(){winid=window.open('https://nonps-dev.adelaide.edu.au/psc/hcm92dev_nonps/EMPLOYEE/HRMS/c/G_FORM_TTLE.G_FORM_TTL_SRCH.GBL?Page=G_FORM_TTL_SRCH&G_FORM_TYPE=TITLE&G_FORM_TASK=ADD','_blank','status=no,directories=no,location=no,resizable=no,menubar=no,width=800,height=1000,titlebar=no,toolbar=no,scrollbars=yes');}E();">HCM92DEV - Guest</a> 
-   <br/><a href="javascript:function%20E(){winid=window.open('https://nonps-uat.adelaide.edu.au/psc/hcm92uat_nonps/EMPLOYEE/HRMS/c/G_FORM_TTLE.G_FORM_TTL_SRCH.GBL?Page=G_FORM_TTL_SRCH&G_FORM_TYPE=TITLE&G_FORM_TASK=ADD','_blank','status=no,directories=no,location=no,resizable=no,menubar=no,width=800,height=1000,titlebar=no,toolbar=no,scrollbars=yes');}E();">HCM92UAT - Guest</a>
+  <body background="https://hcm-dev.adelaide.edu.au/hcm92dev/images/BG_Texture.png" border=2>
+  <div id="left"></div>
+<div id="right"></div>
+<div id="top"></div>
+<div id="bottom"></div>
+  <div class="ps_text_header" id="signInText" role="heading" aria-level="1">Sign In</div>
+  <center>
+   <a href="javascript:function%20E(){winid=window.open('https://hcm-dev.adelaide.edu.au/psp/hcm92dev/?cmd=logout');}E();" class="button button-green">HCM92DEV</a>
+   <br/>
+   <br/><a href="javascript:function%20E(){winid=window.open('https://nonps-dev.adelaide.edu.au/psc/hcm92dev_nonps/EMPLOYEE/HRMS/c/G_FORM_TTLE.G_FORM_TTL_SRCH.GBL?Page=G_FORM_TTL_SRCH&G_FORM_TYPE=TITLE&G_FORM_TASK=ADD','_blank','status=no,directories=no,location=no,resizable=no,menubar=no,width=800,height=1000,titlebar=no,toolbar=no,scrollbars=yes');}E();" class="button button-blue">DEV - Guest</a>
+   <br/>
+   <br/><a href="javascript:function%20E(){winid=window.open('https://hcm92uat.adelaide.edu.au/psp/hcm92uat/?cmd=logout');}E();" class="button button-green">HCM92UAT</a>
+   <br/> 
+   <br/><a href="javascript:function%20E(){winid=window.open('https://nonps-uat.adelaide.edu.au/psc/hcm92uat_nonps/EMPLOYEE/HRMS/c/G_FORM_TTLE.G_FORM_TTL_SRCH.GBL?Page=G_FORM_TTL_SRCH&G_FORM_TYPE=TITLE&G_FORM_TASK=ADD','_blank','status=no,directories=no,location=no,resizable=no,menubar=no,width=800,height=1000,titlebar=no,toolbar=no,scrollbars=yes');}E();" class="button button-blue">UAT - Guest</a>
+   <br/>
+   <br/><a href="javascript:function%20E(){winid=window.open('https://hcm-cpr.adelaide.edu.au/psp/hcm92cpr/?cmd=logout');}E();" class="button button-green">HCM92CPR</a>
+   <br/>
+   <br/>
+   <br/><a href="javascript:function%20E(){winid=window.open('https://nonps.adelaide.edu.au/psc/nonps/SSO_UOA/SSO_UOA/c/G_FORM_TTLE.G_FORM_TTL_SRCH.GBL?Page=G_FORM_TTL_SRCH&G_FORM_TYPE=TITLE&G_FORM_TASK=ADD','_blank','status=no,directories=no,location=no,resizable=no,menubar=no,width=800,height=1000,titlebar=no,toolbar=no,scrollbars=yes');}E();" class="ps-button">PRD - Guest</a>
+  </center>
   </body>
 </html>
