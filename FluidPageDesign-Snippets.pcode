@@ -1,0 +1,45 @@
+/*-----------------------------------------------*/
+/*========== Fluid - StyleSheet Classes =========*/
+/*-----------------------------------------------*/
+
+psc_transparent psc_border-transparent
+
+psc_wrap
+
+psc_nolabel
+
+/*-----------------------------------------------*/
+/* Code block to redirect to a ContentReference: */
+/*-----------------------------------------------*/
+
+Local ApiObject &Cref, &Portal;
+
+&Portal = %Session.GetPortalRegistry();
+&Portal.Open(%Portal);
+
+&Cref = &Portal.FindCrefByName("G_EMPV_SRCH_FL_UOA");
+
+rem %Response.RedirectURL(&Cref.AbsolutePortalURL);
+
+/*-----------------------------------------------*/
+/* Code block to resize Fluid pages to Viewport  */
+/*-----------------------------------------------*/
+
+Declare Function SetViewport PeopleCode PTLAYOUT.FUNCLIB FieldFormula; 
+9:36 AM 
+
+SetViewport(""); 
+
+/*-----------------------------------------------*/
+/* Code block to Conditionally Format Fluid Page */
+/*-----------------------------------------------*/
+
+If %Request.BrowserDeviceFormFactor = %FormFactor_Small Then
+      /* change to div grid */
+      &grid.Layout = %ListGrid;
+   Else
+      /* change to flex grid */
+      &grid.Layout = %OriginalFlexGrid;
+End-If;
+   
+   
