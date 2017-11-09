@@ -7,23 +7,29 @@ div {
 
 <script type="text/javascript">
 
-function onElementHeightChange(vfwaframe)
+function onElementHeightChange(elm, vfwaframe)
 {
-    var innerDoc = (vfwaframe.contentDocument) ? vfwaframe.contentDocument : vfwaframe.contentWindow.document;
+    var lastHeight = elm.scrollHeight, newHeight;
 
-        if( innerDoc.body.scrollHeight != vfwaframe.height )
+    (function run(){
+        newHeight = elm.scrollHeight;
+
+        if( lastHeight != newHeight )
         {
-            vfwaframe.height = innerDoc.body.scrollHeight;
-            vfwaframe.width = innerDoc.body.scrollWidth;
+            vfwaframe.height = elm.scrollHeight;
+            vfwaframe.width = elm.scrollWidth;
         }
 
-        if( vfwaframe.onElementHeightChangeTimer )
-            clearTimeout(vfwaframe.onElementHeightChangeTimer);
+        lastHeight = newHeight;
 
-        vfwaframe.onElementHeightChangeTimer = setTimeout(onElementHeightChange(vfwaframe), 2000);
+        if( elm.onElementHeightChangeTimer )
+            clearTimeout(elm.onElementHeightChangeTimer);
+
+        elm.onElementHeightChangeTimer = setTimeout(run, 1000);
+    })();
 }
-
 </script>
+
 
 <script type="text/javascript">
 
@@ -49,17 +55,16 @@ function onLoadIF(vfwaframe)
             elements[len].target = "_top";
     }
 
-    onElementHeightChange(vfwaframe);
-
+    onElementHeightChange(innerDoc.body, vfwaframe);
 }
 </script>
 
 <div>
-<iframe id="vfwaWebsite" style="border:none;" align="middle" src="https://www.webdev.google.edu.au/hr/systems/sso/vfwa/"  height="1400" width="1100"></iframe>
+<iframe id="vfwaWebsite" style="border:none;" align="middle" src="https://www.webdev.adelaide.edu.au/hr/systems/sso/vfwa/"  height="1400" width="1100" tabindex="-1"></iframe>
 </div>
 
 <script type="text/javascript">
-    document.domain = "google.edu.au";
+    document.domain = "adelaide.edu.au";
 
     var iFrameVFWA = document.getElementById('vfwaWebsite');
     iFrameVFWA.onload = function() {  onLoadIF(iFrameVFWA);  };
