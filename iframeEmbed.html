@@ -6,6 +6,7 @@ div {
 </style>
 
 <script type="text/javascript">
+var origHeight;
 
 function onElementHeightChange(elm, vfwaframe)
 {
@@ -25,10 +26,43 @@ function onElementHeightChange(elm, vfwaframe)
         if( elm.onElementHeightChangeTimer )
             clearTimeout(elm.onElementHeightChangeTimer);
 
-        elm.onElementHeightChangeTimer = setTimeout(run, 1000);
+        elm.onElementHeightChangeTimer = setTimeout(run, 500);
     })();
 }
+
+function accOpenAction(accItems, vfwaframe)
+{
+    var sumHeight=0;
+    var len = accItems.length;
+
+    while( len-- )
+    {
+       var accItem = accItems[len];
+       var accItemDiv = accItem.getElementsByClassName('ui-accordion-content-active')[0];
+       if (accItemDiv)
+        sumHeight = sumHeight + accItemDiv.offsetHeight;
+   }
+
+vfwaframe.height = origHeight + sumHeight;
+
+}
+
+function accordionEventHandler(elm, vfwaframe)
+{
+    var accItems = elm.getElementsByClassName('accordion-item');
+
+    var len = accItems.length;
+
+    while( len-- )
+    {
+        var accItem = accItems[len];
+        accItem.getElementsByTagName('a')[0].addEventListener('click', function () {accOpenAction(accItems, vfwaframe);}, true);        
+    }
+}
+
 </script>
+
+
 
 
 <script type="text/javascript">
@@ -36,7 +70,7 @@ function onElementHeightChange(elm, vfwaframe)
 function onLoadIF(vfwaframe)
 {
     var innerDoc = (vfwaframe.contentDocument) ? vfwaframe.contentDocument : vfwaframe.contentWindow.document;
-
+origHeight = innerDoc.body.scrollHeight;
     vfwaframe.height = innerDoc.body.scrollHeight;
     vfwaframe.width = innerDoc.body.scrollWidth;
 
@@ -56,6 +90,8 @@ function onLoadIF(vfwaframe)
     }
 
     onElementHeightChange(innerDoc.body, vfwaframe);
+    //accordionEventHandler(innerDoc.body, vfwaframe);
+
 }
 </script>
 
@@ -68,4 +104,6 @@ function onLoadIF(vfwaframe)
 
     var iFrameVFWA = document.getElementById('vfwaWebsite');
     iFrameVFWA.onload = function() {  onLoadIF(iFrameVFWA);  };
+
+//onElementHeightChange(iFrameVFWA);
 </script>
