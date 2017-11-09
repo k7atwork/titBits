@@ -1,0 +1,33 @@
+<script type="text/javascript">
+
+function onLoadIF(vfwaframe)
+{
+    var innerDoc = (vfwaframe.contentDocument) ? vfwaframe.contentDocument : vfwaframe.contentWindow.document;
+
+    vfwaframe.height = innerDoc.body.scrollHeight;
+    vfwaframe.width = innerDoc.body.scrollWidth;
+
+    var left_nav = innerDoc.getElementById('uoa-left-column');
+    left_nav.style = "display:none";
+
+    var elements = innerDoc.getElementsByTagName('a');
+
+    var len = elements.length;
+
+    while( len-- )
+    {
+        if  (elements[len].href.indexOf('SSO_UOA/SSO_UOA') == -1)
+            elements[len].target = "_blank";
+        else
+            elements[len].target = "_top";
+    }
+
+}
+</script>
+
+<iframe id="vfwaWebsite" style="border:none;" align="middle" src="https://www.webdev.adelaide.edu.au/hr/systems/sso/vfwa/"  height="1400" width="1100"></iframe>
+
+<script type="text/javascript">
+    var iFrameVFWA = document.getElementById('vfwaWebsite');
+    iFrameVFWA.onload = function() {  onLoadIF(iFrameVFWA);  }
+</script>
