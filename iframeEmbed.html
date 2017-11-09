@@ -1,3 +1,30 @@
+<style>
+div {
+  text-align:center;
+  width:100%;
+}
+</style>
+
+<script type="text/javascript">
+
+function onElementHeightChange(vfwaframe)
+{
+    var innerDoc = (vfwaframe.contentDocument) ? vfwaframe.contentDocument : vfwaframe.contentWindow.document;
+
+        if( innerDoc.body.scrollHeight != vfwaframe.height )
+        {
+            vfwaframe.height = innerDoc.body.scrollHeight;
+            vfwaframe.width = innerDoc.body.scrollWidth;
+        }
+
+        if( vfwaframe.onElementHeightChangeTimer )
+            clearTimeout(vfwaframe.onElementHeightChangeTimer);
+
+        vfwaframe.onElementHeightChangeTimer = setTimeout(onElementHeightChange(vfwaframe), 2000);
+}
+
+</script>
+
 <script type="text/javascript">
 
 function onLoadIF(vfwaframe)
@@ -22,12 +49,18 @@ function onLoadIF(vfwaframe)
             elements[len].target = "_top";
     }
 
+    onElementHeightChange(vfwaframe);
+
 }
 </script>
 
+<div>
 <iframe id="vfwaWebsite" style="border:none;" align="middle" src="https://www.webdev.adelaide.edu.au/hr/systems/sso/vfwa/"  height="1400" width="1100"></iframe>
+</div>
 
 <script type="text/javascript">
+    document.domain = "google.edu.au";
+
     var iFrameVFWA = document.getElementById('vfwaWebsite');
-    iFrameVFWA.onload = function() {  onLoadIF(iFrameVFWA);  }
+    iFrameVFWA.onload = function() {  onLoadIF(iFrameVFWA);  };
 </script>
