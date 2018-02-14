@@ -1,105 +1,18 @@
+WEBLIB_XXXX.ISCRIPT1 FieldFormula
+
 Function IScript_LaunchVFWAHRPage
    Local string &hrVFWA_URL;
    SQLExec("SELECT HRS_SITE_EXT_URL FROM %TABLE(:1)", Record.VFWA_CONFIG, &hrVFWA_URL);
    %Response.Write(GetHTMLText(HTML.VFWA_WELCOME_HR_PAGE, &hrVFWA_URL));
 End-Function;
 
-<style>
-div {
-  text-align:center;
-  width:100%;
-}
-</style>
+/*
+HTML.VFWA_WELCOME_HR_PAGE = iframeEmbed.html
+*/
 
-<!-----------------------------------------------------------
-JavaScript Function to Dyanically Change the iFrame Height
------------------------------------------------------------->
+Register the Content Reference as a, URL Type ="PeopleSoft Script"
 
-<script type="text/javascript">
-
-function onElementHeightChange(elm, vfwaframe)
-{
-    var lastHeight = elm.scrollHeight, newHeight;
-    var lastWidth = elm.scrollWidth, newWidth;
-
-    (function run(){
-        newHeight = elm.scrollHeight;
-        newWidth = elm.scrollWidth;
-
-        if(( lastHeight != newHeight ) || ( lastHeight != newHeight ))
-        {
-            vfwaframe.height = elm.scrollHeight;
-            vfwaframe.width = elm.scrollWidth;
-        }
-
-        lastHeight = newHeight;
-        lastWidth = newWidth;
-
-        if( elm.onElementHeightChangeTimer )
-            clearTimeout(elm.onElementHeightChangeTimer);
-
-        elm.onElementHeightChangeTimer = setTimeout(run, 500);
-    })();
-}
-
-</script>
-
-<!-----------------------------------------------------------
-JavaScript Function to Customise Webpage Look & Feel on Load
------------------------------------------------------------->
-
-<script type="text/javascript">
-
-function onLoadIF(vfwaframe)
-{
-<!-- Initialise the iFrame DOM Document object -->
-    var innerDoc = (vfwaframe.contentDocument) ? vfwaframe.contentDocument : vfwaframe.contentWindow.document;
-
-<!-- Set the height of the iFrame -->
-    vfwaframe.height = innerDoc.body.scrollHeight;
-    vfwaframe.width = innerDoc.body.scrollWidth;
-
-<!-- Hide the Left Hand Navigation -->
-    var left_nav = innerDoc.getElementById('uoa-left-column');
-    left_nav.style = "display:none";
-
-<!-- Inject the target attribute for all the hyperlink elements -->
-    var elements = innerDoc.getElementsByTagName('a');
-
-    var len = elements.length;
-
-    while( len-- )
-    {
-    <!-- START - UA_H_IF_GT_004_HCM_3859 -->
-        if  (elements[len].href.indexOf('emailLinkClick();') == -1)
-    <!--  END  - UA_H_IF_GT_004_HCM_3859 -->
-        if  (elements[len].href.indexOf('SSO_UOA/SSO_UOA') == -1)
-            elements[len].target = "_blank";
-        else
-            elements[len].target = "_top";
-    }
-
-<!-- Dynamically Increase the iFrame height to avoid scroll bars -->
-    onElementHeightChange(innerDoc.body, vfwaframe);
-}
-</script>
-
-<!-----------------------------------------------------------
-iFrame Body Elements
------------------------------------------------------------->
-
-<!-- iFrame Body HTML -->
-<div>
-<iframe id="vfwaWebsite" style="border:none;" align="middle" src="%Bind(:1)"  height="1400" width="1005" tabindex="-1"></iframe>
-</div>
-
-<!-----------------------------------------------------------
-Call the JavaScript function on load to Modify Look & Feel
------------------------------------------------------------->
-
-<script type="text/javascript">
-    document.domain = "adelaide.edu.au";
-
-    var iFrameVFWA = document.getElementById('vfwaWebsite');
-    iFrameVFWA.onload = function() {  onLoadIF(iFrameVFWA);  };
-</script>
+Record (Table) Name = WEBLIB_XXXX
+Field Name = ISCRIPT1 
+PeopleCode Event Name = FieldFormula
+PeopleCode Function Name = IScript_LaunchVFWAHRPage
