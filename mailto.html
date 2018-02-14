@@ -1,0 +1,31 @@
+<script type="text/javascript">
+
+    function emailLinkClick()
+    {
+    var emailTO="<Insert the email address of your Head of School / Branch> <Insert the email address of your Supervisor>";
+    var emailCC="payroll@adelaide.edu.au"
+
+    var subject="End a Flexible Work Arrangement (FWA)";
+    
+    var lnfd = String.fromCharCode(10) + String.fromCharCode(10)
+    
+    var emlBody1="I wish to end my Flexible Work Arrangement early." + lnfd + "The details of my request are as follows:";
+    var emlBody2="Full Name:" + lnfd + "ID:" + lnfd + "Position Title:" + lnfd + "Type of arrangement: Reduced Employment Fraction / Compressed Weeks / Change of Work Pattern";
+    var emlBody3="Original effective dates of the arrangement being ended: DD/MM/YY to DD/MM/YY" + lnfd + "New date to end the arrangement: DD/MM/YY";
+    var emlBody4="Comments:";
+    
+    var emlBody = emlBody1 + lnfd + emlBody2 + lnfd + emlBody3 + lnfd + emlBody4;
+    
+    var emlURI = "mailto:" + emailTO + "?subject=" + subject + "&cc=" + emailCC + "&body=" + emlBody;
+    
+    var encodedemlURI = encodeURI(emlURI);
+    
+    if (navigator.userAgent.indexOf("like Mac") != -1)
+    window.open(encodedemlURI, "_system");
+    else
+    window.location.href=encodedemlURI;
+    
+    }
+</script>
+
+<a href="javascript:emailLinkClick();" class="button button-gray"> End an Arrangement</a>
