@@ -86,7 +86,11 @@ origHeight = innerDoc.body.scrollHeight;
         if  (elements[len].href.indexOf('SSO_UOA/SSO_UOA') == -1)
             elements[len].target = "_blank";
         else
+        {
             elements[len].target = "_top";
+            var urlEnv = document.location.href.split("/")[2].substr(4,3)
+            elements[len].href = elements[len].href.replace(/uat/g,urlEnv);
+        }
     }
 
     onElementHeightChange(innerDoc.body, vfwaframe);
