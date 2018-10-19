@@ -1,0 +1,153 @@
+<script>
+        var ss = document.createElement('link');
+        ss.rel = "stylesheet";
+        ss.href = "%StyleSheet(UOA_ADDRESS_VALID_CSS)";
+        ss.type = "text/css";
+        document.getElementsByTagName('head')[0].appendChild(ss);
+
+        var ss1 = document.createElement('link');
+        ss1.rel = "stylesheet";
+        ss1.href = "%StyleSheet(UOA_ADDR_HIDE_UNHIDE_CSS)";
+        ss1.type = "text/css";
+        document.getElementsByTagName('head')[0].appendChild(ss1);
+</script>
+
+<script src='%JavaScript(UOA_ES5_SHIM_MIN_JS)'></script>
+<script src='%JavaScript(UOA_JQUERY_MIN_JS)'></script>
+<script src='%JavaScript(UOA_JQUERY_IE_CORS_JS)'></script>
+<script src='%JavaScript(UOA_JQUERY_UI_MIN_JS)'></script>
+<script src='%JavaScript(UOA_EDQ_VALIDATE_UI_MIN_JS)'></script>
+<script src='%JavaScript(UOA_EDQ_TOKEN_JS)'></script>
+
+<script>    
+function loadAddressValidate()
+{           
+        var addressV2 = $("#%Bind(:1) #ADDRESS11").address({
+            "searchCountry": "AUS",
+            resultMappings: [{
+                selector: "#%Bind(:1) #ADDRESS11",
+                format: '{{addressLine1}}'
+            }, {
+                selector: "#%Bind(:1) #ADDRESS2",
+                format: '{{addressLine2}}, {{addressLine3}}'
+            }, {
+                selector: "#%Bind(:1) #CITY",
+                format: '{{locality}}'
+            }, {
+                selector: "#%Bind(:1) #STATE",
+                format: '{{province}}'
+            }, {
+                selector: "#%Bind(:1) #POSTAL",
+                format: '{{postalCode}}'
+            }],
+            token: EDQ.sample.token
+        });
+
+        addressV2.on("addressbeforesearch", function(e, search) {
+            var addrValidFld = document.getElementById("UOA_ADDR_VALID");
+        });
+
+        // This function is called in the below "addressbeforemap" code.
+        function addressOverride(searchTextValue) {
+            //$(readOnlyAddressSelector).html('').hide();
+            //$(searchContainerSelector).hide();
+
+            //$(originalContainer).show();
+            //$(resetButtonSelector).show();
+            //alert('Address Overridden: ' + searchTextValue);
+        }
+
+        // Attach event on picklist "override" clicked.
+        addressV2.on("addressbeforemap", function(e, item) {
+            var addrValidFld = document.getElementById("UOA_ADDR_VALID");
+            if (item.override) {
+                // addressOverride(item.suggestion || '??');
+                addrValidFld.value="N";
+                makeFieldsRW();
+                return true;
+            }
+            else
+            {
+                //alert('Address from picklist selected');
+                addrValidFld.value="Y";
+            }
+        });
+
+        // Attach event after address is mapped.
+        addressV2.on("addressaftermap", function(e, item) {
+            var addr1Fld = document.getElementById("ADDRESS11");
+            var stateFld = document.getElementById("STATE");
+            if ("%Bind(:1)" == "HR_EE_ADDR_FL") {
+                doFocus_win0(addr1Fld, true, true);
+                doFocus_win0(stateFld, false, true);
+            } 
+            else
+            {
+                oChange_win0=stateFld;
+                stateFld.focus();
+                addr1Fld.focus();
+            }
+
+            if (!addr1Fld.classList.contains("xpn-address"))
+                addr1Fld.classList.add("xpn-address");
+            if (!addr1Fld.classList.contains("xpn-address-verified"))
+                addr1Fld.classList.add("xpn-address-verified");
+        });
+
+}
+
+function makeFieldsRO()
+{
+// alert('testing RO');
+  var flds = ["ADDRESS2", "ADDRESS3", "ADDRESS4", "DESCR_STATE", "CITY", "POSTAL"];
+  var numFlds = flds.length;
+
+  for (var i = 0; i < numFlds; i++) 
+  {
+      var fld = document.getElementById(flds[i]);
+      if ( fld )
+           // fld.setAttribute('readonly',true);
+           $('#'+flds[i]).attr("readonly", true);
+  }
+}
+
+function makeFieldsRW()
+{
+// alert('testing RW');
+  var flds = ["ADDRESS2", "ADDRESS3", "ADDRESS4", "DESCR_STATE", "CITY", "POSTAL"];
+  var numFlds = flds.length;
+
+  for (var i = 0; i < numFlds; i++) 
+  {
+      var fld = document.getElementById(flds[i]);
+      if ( fld )
+           // fld.toggleAttribute('readonly');
+           $('#'+flds[i]).attr("readonly", false);
+  }
+}
+
+if ("%Bind(:1)" == "HR_EE_ADDR_FL") {
+   var country = document.getElementById("DESCR_COUNTRY");  
+   var addrValid = document.getElementById("UOA_ADDR_VALID");
+   if (country.value == "Australia")
+   {
+      loadAddressValidate();
+      if (addrValid.value == '' || addrValid.value == 'Y')
+      {
+           // loadAddressValidate();
+           makeFieldsRO();
+      }
+   }
+}
+else {
+   var country = document.getElementById("COUNTRY_TBL_DESCR");
+   var addrValid = document.getElementById("UOA_ADDR_VALID");
+   if (country.innerHTML == "Australia")
+   {
+      loadAddressValidate();
+      if (("%Bind(:1)" == "G_FORM_TTLE_A") && (addrValid.value == '' || addrValid.value == 'Y'))
+            makeFieldsRO();
+   }
+}
+
+</script>
