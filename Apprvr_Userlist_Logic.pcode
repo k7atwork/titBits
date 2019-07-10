@@ -1,0 +1,150 @@
+import EOAW_CORE:LaunchManager;
+
+Component EOAW_CORE:LaunchManager &launchMgr;
+
+If &launchMgr.hasAppInst Then
+   
+   Local number &step, &currentStep, &oprAprvdSteps, &oprPendSteps;
+   Local string &StepAprvr;
+   
+/*----------------------------------------------------------------*/   
+/* APPROACH 1 - USE Individual Userlist Source Types - Explicitly */
+/*----------------------------------------------------------------*/
+   <*
+   
+   /*--[ Review already Approved Steps for Validation ]--*/
+   
+   Local SQL &approvedSteps = GetSQL(SQL.ANU_OCR_WF_STEP_APPROVERS, "A", ANU_OCR_INVOICE.KOFAX_KEY.Value);
+   
+   While &approvedSteps.Fetch(&step, &StepAprvr)
+      If ANU_OCR_WF_WRK.EOAWREASSIGNOPRID.Value = &StepAprvr Then
+         &oprAprvdSteps = &oprAprvdSteps + 1;
+      End-If;
+   End-While;
+   
+   /*--[ Review pending Steps for Validation ]--*/
+   
+   SQLExec(SQL.ANU_OCR_WF_STEP_APPROVERS, "P", ANU_OCR_INVOICE.KOFAX_KEY.Value, &currentStep, &StepAprvr);
+   
+   Local ApiObject &UL_Query = %Session.GetQuery();
+   
+   Local SQL &UL_SQL = GetSQL(SQL.ANU_WF_APPROVE_USERLIST_SQL, &launchMgr.appDef.awprcs_id, &launchMgr.appDef.definition_id, %Date, &currentStep);
+   
+   Local string &UL_Source, &UL;
+   
+   While &UL_SQL.Fetch(&UL_Source, &UL)
+      
+      Evaluate &UL_Source
+      When = "Q" /* Userlist Source = PSQuery */
+         
+         If &UL_Query.Open(&UL, True, False) = 0 Then
+            rem WinMessage(&UL_Query.MetaSQL, 0);
+            Local Record &promptRec = &UL_Query.PromptRecord;
+            
+            For &k = 1 To &promptRec.FieldCount
+               &promptRec.GetField(&k).Value = GetRecord(@("RECORD." | &launchMgr.txn.header)).GetField(@("FIELD." | &promptRec.GetField(&k).Name)).Value;
+            End-For;
+            
+            Local string &queryOutput = &UL_Query.RunToString(&promptRec, 0, %Query_TXT, 0);
+            
+            If Find(ANU_OCR_WF_WRK.EOAWREASSIGNOPRID.Value, &queryOutput) > 0 Then
+               &oprPendSteps = &oprPendSteps + 1;
+            End-If;
+            
+            &UL_Query.close();
+            
+         End-If;
+         
+         Break;
+         
+      When = "R" /* Userlist Source = Role */
+         
+         Local string &UserinRole = "N";
+         SQLExec("SELECT 'Y' FROM PSROLEUSER WHERE ROLEUSER=:1 AND ROLENAME=:2", ANU_OCR_WF_WRK.EOAWREASSIGNOPRID.Value, &UL, &UserinRole);
+         If &UserinRole = "Y" Then
+            &oprPendSteps = &oprPendSteps + 1;
+         End-If;
+         
+         Break;
+         
+      When = "S" /* Userlist Source = SQL */
+         
+         Local array of any &SQL_Params = CreateArrayAny();
+         Local SQL &XREF_SQL = CreateSQL("SELECT RDB.FIELDNAME FROM PSRECFIELDDB RDB, PSRECFIELD R WHERE RDB.RECNAME=R.RECNAME AND R.FIELDNUM=1 AND R.FIELDNAME = 'EOAW_XREF_SBR' AND RDB.RECNAME_PARENT <> 'EOAW_XREF_SBR' AND R.RECNAME=:1 ORDER BY RDB.FIELDNUM", &launchMgr.txn.recname_xref);
+         Local string &SQL_ParamName;
+         
+         While &XREF_SQL.Fetch(&SQL_ParamName)
+            &SQL_Params.Push(GetRecord(@("RECORD." | &launchMgr.txn.header)).GetField(@("FIELD." | &SQL_ParamName)).Value);
+         End-While;
+         
+         Local SQL &UL_Appr_SQL = GetSQL(@("SQL." | &UL), &SQL_Params);
+         
+         While &UL_Appr_SQL.Fetch(&ApprvrID)
+            WinMessage("&ApprvrID : " | &ApprvrID, 0);
+            If &ApprvrID = ANU_OCR_WF_WRK.EOAWREASSIGNOPRID.Value Then
+               &oprPendSteps = &oprPendSteps + 1;
+               Break;
+            End-If;
+         End-While;
+         
+         Break;
+      When-Other
+         Error "Userlist Type not handled in logic ! ! !";
+      End-Evaluate
+   End-While;
+   
+   /*--[ Display Error ]--*/
+   
+   If &oprAprvdSteps + &oprPendSteps = 4 Then
+      Error "You are not able to approve all workflow steps for a Scanned Invoice.  Please select another 'Reassign to' user" | Char(10) | "&oprAprvdSteps = " | &oprAprvdSteps | Char(10) | "&oprPendSteps = " | &oprPendSteps;
+   End-If;
+
+*>
+
+/*----------------------------------------------------------------*/   
+/* APPROACH 2 - USE PeopleSoft Delivered AppPackage to do the Job */
+/*----------------------------------------------------------------*/
+   
+   /*--[ Review already Approved Steps for Validation ]--*/
+   
+   Local array of string &priorAprvrs = CreateArrayRept("", 0);
+   
+   Local SQL &approvedSteps = GetSQL(SQL.ANU_OCR_WF_STEP_APPROVERS, "A", ANU_OCR_INVOICE.KOFAX_KEY.Value);
+   
+   While &approvedSteps.Fetch(&step, &StepAprvr)
+      &priorAprvrs.Push(&StepAprvr);
+      If ANU_OCR_WF_WRK.EOAWREASSIGNOPRID.Value = &StepAprvr Then
+         &oprAprvdSteps = &oprAprvdSteps + 1;
+      End-If;
+   End-While;
+   
+   /*--[ Push the Reassign OPRID to Prior Approvers Array ]--*/
+   
+   &priorAprvrs.Push(ANU_OCR_WF_WRK.EOAWREASSIGNOPRID.Value);
+   
+   /*--[ Review pending Steps for Validation ]--*/
+   
+   SQLExec(SQL.ANU_OCR_WF_STEP_APPROVERS, "P", ANU_OCR_INVOICE.KOFAX_KEY.Value, &currentStep, &StepAprvr);
+   
+   Local SQL &UL_SQL = GetSQL(SQL.ANU_WF_APPROVE_USERLIST_SQL, &launchMgr.appDef.awprcs_id, &launchMgr.appDef.definition_id, %Date, &currentStep);
+   
+   Local Record &threadRec = CreateRecord(@("RECORD." | &launchMgr.txn.recname_xref));
+   GetRecord(@("RECORD." | &launchMgr.txn.header)).CopyFieldsTo(&threadRec);
+   
+   Local Record &UL_Rec = CreateRecord(Record.EOAWUSER_LIST);
+   
+   While &UL_SQL.Fetch(&UL_Rec)
+      &UL = CreateObject(&UL_Rec.APP_CLASS.Value, &UL_Rec);
+      Local array of string &pendAprvrs = &UL.GetUsers(&priorAprvrs, &threadRec);
+      If &pendAprvrs.Find(ANU_OCR_WF_WRK.EOAWREASSIGNOPRID.Value) > 0 Then
+         &oprPendSteps = &oprPendSteps + 1;
+      End-If;
+   End-While;
+   
+   /*--[ Display Error ]--*/
+   
+   If &oprAprvdSteps + &oprPendSteps = 4 Then
+      Error "You are not able to approve all workflow steps for a Scanned Invoice.  Please select another 'Reassign to' user" | Char(10) | "&oprAprvdSteps = " | &oprAprvdSteps | Char(10) | "&oprPendSteps = " | &oprPendSteps;
+   End-If;
+   
+End-If;
