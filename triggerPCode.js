@@ -1,6 +1,15 @@
 <script>
 
-function myFunction() {
+function closeWindow() {
+  // setTimeout(function() {window.close();}, 5000);
+  // setTimeout(function(){window.location.href = "https://www.anu.edu.au";}, 60000);
+}
+
+// ==================================================
+// Trigger the FieldChange PeopleCode in Work Record
+// ==================================================
+
+function triggerPplCode() {
 
   var ele = document.getElementById("DERIVED_HR_ACTION");
 
@@ -15,15 +24,20 @@ function myFunction() {
 
     submitAction_win0(document.win0, ele.id, event);
   }
+
+  // closeWindow();
+
 }
 
 
+// ==================================================
 // On Load of document trigger the PCode
 // on FieldChange of Dummy field (DERIVED_HR.ACTION)
+// ==================================================
 
 
 window.addEventListener('load', function(e) {
-  myFunction();
+  triggerPplCode();
 });
 
 </script>
