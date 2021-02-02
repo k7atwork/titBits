@@ -10,6 +10,11 @@ class Utils
    method makeRowsetDisplayOnly(&inRowset As Rowset, &include_child As string, &exclFlds As array of array of string);
    method makeRecordDisplayOnly(&inRecord As Record, &exclFlds As array of array of string);
    
+   method setDefault(&inRec As Record);
+   method executeEdits(&inRec As Record) Returns boolean;
+   
+   method GetNextJournalId() Returns string;
+   
    property string ConfirmationMessage get set;
    
    property string fileNamePrefix get;
@@ -246,3 +251,71 @@ method excludedRecord
    
 end-method;
 
+method GetNextJournalId
+   /+ Returns String +/
+   
+   Local number &NxtJrnlId;
+   Local string &StrNxtJrnlId;
+   
+   &NxtJrnlId = GetNextNumberWithGapsCommit(INSTALLATION_FS.JOURNAL_NUM_ASSIGN, 9999999999, 1);
+   &StrNxtJrnlId = Rept("0", ANU_FX_JRNL_AET.JOURNAL_ID.FieldLength - Len(String(&NxtJrnlId))) | String(&NxtJrnlId);
+   
+   Return &StrNxtJrnlId;
+   
+end-method;
+
+
+method setDefault
+   /+ &inRec as Record +/
+   
+   Local Field &RecFld;
+   Local number &k;
+   
+   For &k = 1 To &inRec.FieldCount
+      &RecFld = &inRec.GetField(&k);
+      If Not &RecFld.IsKey Then
+         &RecFld.SetDefault();
+      End-If;
+   End-For;
+   
+end-method;
+
+
+method executeEdits
+   /+ &inRec as Record +/
+   /+ Returns Boolean +/
+   
+   rem MessageBox(0, "", 0, 0, "Processing 'executeEdits'  for " | &inRec.Name);
+   
+   /*--[ Debug ]--*/
+   rem %This.debug.DebugOn = True;
+   %This.debug.display_record(&inRec);
+   rem %This.debug.DebugOn = False;
+   /*-------------*/
+   
+   Local Field &RecFld;
+   Local number &k;
+   
+   REM &inRec.ExecuteEdits(%Edit_Required + %Edit_PromptTable + %Edit_TranslateTable);
+   &inRec.ExecuteEdits(%Edit_Required + %Edit_TranslateTable);
+   
+   If &inRec.IsEditError Then
+      For &k = 1 To &inRec.FieldCount
+         &RecFld = &inRec.GetField(&k);
+         If &RecFld.EditError Then
+            Local number &MSGNUM = &RecFld.MessageNumber;
+            Local number &MSGSET = &RecFld.MessageSetNumber;
+            
+            Local string &MSG = MsgGetText(&MSGSET, &MSGNUM, "");
+            MessageBox(0, "", 0, 0, "Errors encountered in " | &inRec.Name | "." | &RecFld.Name | Char(10) | &MSG);
+            REM MessageBox(0, "", &MSGSET, &MSGNUM, "Errors encountered in %1", &inRec.Name | "." | &RecFld.Name);
+            
+         End-If;
+      End-For;
+      
+      Error "ERROR ENCOUNTERED: Previous message would have given more details !";
+   End-If;
+   
+   Return True;
+   
+end-method;
