@@ -1,0 +1,274 @@
+class debug
+   /*-----------------------------------------------------------------------------------------------------------------
+		The debug constructor determines where the debug statements will be written out to.
+		Current available options:
+
+	&output_flag		&output_object						output written to
+	------------		--------------						-----------------
+	'FIELD'				Field object						field.value (for example a LongChar field on a page.
+	'MESSAGEBOX'		null								MessageBox(0, "", 0, 0, <debug text>);
+	'CI_BASE_MESSAGE'	ANU_UTILITIES:CI_HELPER:CI_Base		will write to message collection as debug message
+	'FILE'				File Object							file.writeline. Default delimeter is comma.
+    'NONE'				null								Allows object to be instantiated to avoid any null reference
+															errors, but no debugging occurs.
+    *-----------------------------------------------------------------------------------------------------------------*/
+   method debug(&output_flag As string, &output_object As any);
+   
+   method display(&display_string As string);
+   method display_array(&inArray As array of string);
+   method display_rec_array(&inArray As array of Record);
+   method display_rowset(&inRowset As Rowset); /* display child rowsets */
+   method display_rowset2(&inRowset As Rowset); /* do not display child rowsets */
+   method display_record(&inRecord As Record);
+   
+   /*------------------------------------------------------------------------------------------
+		The following methods apply only to:
+			FIELD
+    *-----------------------------------------------------------------------------------------*/
+   method clear();
+   
+   property string Output_Type;
+   property boolean DebugOn;
+   property number LongChar_Dipslay_Length;
+   
+   /*------------------------------------------------------------------------------------------
+	 Default delimeters:
+
+	&output_flag		
+	------------		
+	'FIELD'				':'
+	'MESSAGEBOX'		':'	
+	'CI_BASE_MESSAGE'	':'
+	'FILE'				','
+    *-----------------------------------------------------------------------------------------*/
+   property string delimeter;
+   
+private
+   
+   instance Field &Display_Field;
+   rem instance ANU_UTILITIES:CI_HELPER:CI_Base &CIBase;
+   instance any &CIBase;
+   instance File &Display_File;
+   
+   method display_rowset_flag(&inRowset As Rowset, &flag As string);
+   
+end-class;
+
+method debug
+   /+ &output_flag as String, +/
+   /+ &output_object as Any +/
+   
+   &Output_Type = Upper(&output_flag);
+   &DebugOn = True;
+   
+   &LongChar_Dipslay_Length = - 1;
+   
+   Evaluate &Output_Type
+   When "FIELD"
+      
+      rem Local string &fieldname = &output_object;
+      rem &Display_Field = GetField(@(&fieldname));
+      &Display_Field = &output_object;
+      rem &Display_Field.Value = "";
+      &delimeter = ":";
+      
+   When "CI_BASE_MESSAGE"
+      &CIBase = &output_object;
+      &delimeter = ":";
+      
+   When "MESSAGEBOX"
+      
+      &delimeter = ":";
+      
+   When "FILE"
+      &Display_File = &output_object;
+      &delimeter = ",";
+      
+   When "NONE"
+      &DebugOn = False;
+   When-Other
+   End-Evaluate;
+   
+end-method;
+
+/*----------------------------------------------------------------------------------------------*/
+method display_rowset2
+   /+ &inRowset as Rowset +/
+   
+   rem --- Do not display child rowsets ---;
+   %This.display_rowset_flag(&inRowset, "");
+   
+end-method;
+
+/*----------------------------------------------------------------------------------------------*/
+method display_rowset
+   /+ &inRowset as Rowset +/
+   
+   rem --- Display child rowsets ---;
+   %This.display_rowset_flag(&inRowset, "C");
+   
+end-method;
+
+/*----------------------------------------------------------------------------------------------*/
+method display_rowset_flag
+   /+ &inRowset as Rowset, +/
+   /+ &flag as String +/
+   Local Rowset &child;
+   Local Record &rec;
+   Local Field &field;
+   Local integer &i, &j;
+   Local string &d;
+   
+   If &DebugOn Then
+      
+      If &inRowset <> Null Then
+         For &j = 1 To &inRowset.ActiveRowCount
+            &rec = &inRowset(&j).GetRecord(@("RECORD." | &inRowset.DBRecordName));
+            %This.display_record(&rec);
+            
+            Evaluate &flag
+            When = "C"
+               rem --- display child rowsets ---;
+               For &i = 1 To &inRowset(&j).ChildCount
+                  &child = &inRowset(&j).GetRowset(&i);
+                  %This.display_rowset(&child);
+               End-For;
+               
+            End-Evaluate;
+            
+         End-For;
+      End-If;
+      
+   End-If;
+end-method;
+
+/*----------------------------------------------------------------------------------------------*/
+method display_record
+   /+ &inRecord as Record +/
+   Local Field &field;
+   Local integer &i;
+   Local string &d, &val;
+   
+   If &DebugOn Then
+      
+      If &inRecord <> Null Then
+         
+         For &i = 1 To &inRecord.FieldCount
+            &field = &inRecord.GetField(&i);
+            If &field <> Null And
+                  &field.IsInBuf Then
+               
+               Evaluate &field.Type
+               When = "LONGCHAR"
+                  If %This.LongChar_Dipslay_Length < 0 Then
+                     &val = &field.Value;
+                  Else
+                     &val = Left(&field.Value, %This.LongChar_Dipslay_Length);
+                  End-If;
+               When-Other
+                  &val = &field.Value;
+                  
+               End-Evaluate;
+               
+               &d = &d | %This.delimeter | &val;
+            End-If;
+            
+         End-For;
+         &d = LTrim(&d, %This.delimeter);
+         %This.display(&d);
+         &d = "";
+         
+      End-If;
+      
+   End-If;
+   
+end-method;
+
+/*----------------------------------------------------------------------------------------------*/
+method display_array
+   /+ &inArray as Array of String +/
+   Local integer &k = 0;
+   Local string &element, &d;
+   
+   If &DebugOn Then
+      
+      If &inArray <> Null Then
+         
+         For &k = 1 To &inArray.Len
+            &element = &inArray [&k];
+            &d = &d | %This.delimeter | &element;
+         End-For;
+         &d = LTrim(&d, %This.delimeter);
+         %This.display(&d);
+         
+      End-If;
+   End-If;
+end-method;
+
+
+/*----------------------------------------------------------------------------------------------*/
+method display_rec_array
+   /+ &inArray as Array of Record +/
+   Local integer &k = 0;
+   Local Record &element;
+   
+   If &DebugOn Then
+      
+      If &inArray <> Null Then
+         
+         For &k = 1 To &inArray.Len
+            &element = &inArray [&k];
+            %This.display_record(&element);
+         End-For
+      End-If;
+   End-If;
+   
+end-method;
+
+
+/*----------------------------------------------------------------------------------------------*/
+method display
+   /+ &display_string as String +/
+   
+   If &DebugOn Then
+      
+      Evaluate &Output_Type
+      When "FIELD";
+         &Display_Field.Value = &Display_Field.Value | Char(13) | Char(10) | &display_string;
+         
+      When "CI_BASE_MESSAGE"
+         
+         &CIBase.Debug_Message(&display_string);
+         
+      When "MESSAGEBOX"
+         MessageBox(0, "", 0, 0, &display_string);
+         
+      When "FILE"
+         &Display_File.WriteLine(&display_string);
+         
+      When-Other
+      End-Evaluate;
+      
+   End-If;
+   
+end-method;
+
+
+/*----------------------------------------------------------------------------------------------*/
+method clear
+   
+   If &DebugOn Then
+      
+      Evaluate &Output_Type
+      When "FIELD";
+         &Display_Field.Value = "";
+         
+      When "CI_BASE_MESSAGE"
+      When "MESSAGEBOX"
+      When-Other
+      End-Evaluate;
+      
+   End-If;
+   
+end-method;
+
