@@ -1,0 +1,248 @@
+import SCM_ARCH_ATTACH:Attachments:Constants;
+
+class Utils
+   method Utils();
+   
+   method getStringIDtext(&in_PrgID As string, &in_StrID As string) Returns string;
+   method HandleAttachmentError(&prefix As string, &num As number);
+   
+   method makePageDisplayOnly(&pageName As string, &exclFlds As array of array of string);
+   method makeRowsetDisplayOnly(&inRowset As Rowset, &include_child As string, &exclFlds As array of array of string);
+   method makeRecordDisplayOnly(&inRecord As Record, &exclFlds As array of array of string);
+   
+   property string ConfirmationMessage get set;
+   
+   property string fileNamePrefix get;
+   
+private
+   
+   method excludedRecord(&inRecord As string) Returns boolean;
+   
+   instance array of array of string &stringTBLCache;
+   
+end-class;
+
+Declare Function SetConfirmationMessage PeopleCode PT_WORK.PT_CONFIRM_MSG FieldFormula;
+
+method Utils
+   
+   &stringTBLCache = CreateArrayRept(CreateArrayRept("", 0), 0);
+end-method;
+
+
+method getStringIDtext
+   /+ &in_PrgID as String, +/
+   /+ &in_StrID as String +/
+   /+ Returns String +/
+   
+   Local number &pos1, &pos2;
+   
+   If &stringTBLCache.Len > 0 Then
+      &pos1 = &stringTBLCache.Find(&in_PrgID);
+      If &pos1 > 0 Then
+         &pos2 = &stringTBLCache [&pos1].Find(&in_StrID);
+         If &pos2 = 2 Then
+            Return &stringTBLCache [&pos1][3];
+         End-If;
+      End-If;
+   End-If;
+   
+   Local Record &strTbl = CreateRecord(Record.STRINGS_TBL);
+   &strTbl.PROGRAM_ID.Value = &in_PrgID;
+   &strTbl.STRING_ID.Value = &in_StrID;
+   
+   If &strTbl.SelectByKey() Then
+      &stringTBLCache.Push(CreateArray(&in_PrgID, &in_StrID, &strTbl.STRING_TEXT.Value));
+      Return &strTbl.STRING_TEXT.Value;
+   Else
+      Error "Strings table entry for Program 'ANU_ESS' String ID 'ESS_OCR_TEAM' not found !";
+   End-If;
+   
+end-method;
+
+get fileNamePrefix
+   /+ Returns String +/
+   Return %UserId | "_" | DateTimeToLocalizedString(%Datetime, "yyyyMMdd_HHmmssSS_");
+end-get;
+
+
+method HandleAttachmentError
+   /+ &prefix as String, +/
+   /+ &num as Number +/
+   
+   &prefix = "";
+   
+   Local SCM_ARCH_ATTACH:Attachments:Constants &c_ = create SCM_ARCH_ATTACH:Attachments:Constants();
+   
+   Local string &msg;
+   
+   If (&num = %Attachment_Success) Then
+      Return;
+   End-If;
+   
+   Evaluate &num
+   When = %Attachment_Cancelled
+      Break;
+   When = %Attachment_NoDiskSpaceAppServ
+      &msg = MsgGet(&c_.MESSAGE_CAT, &c_.SERVER_FULL_MSG, &c_.DEFAULT_MSG, &prefix, String(&num));
+      Error (&msg);
+      Break;
+   When = %Attachment_NoDiskSpaceWebServ
+      &msg = MsgGet(&c_.MESSAGE_CAT, &c_.SERVER_FULL_MSG, &c_.DEFAULT_MSG, &prefix, String(&num));
+      Error (&msg);
+      Break;
+   When = %Attachment_FileExceedsMaxSize
+      &msg = MsgGet(&c_.MESSAGE_CAT, &c_.FILE_TOO_BIG_MSG, &c_.DEFAULT_MSG, &prefix, String(&num));
+      Error (&msg);
+      Break;
+   When = %Attachment_DestSystNotFound
+      &msg = MsgGet(&c_.MESSAGE_CAT, &c_.SERVER_NOT_FOUND_MSG, &c_.DEFAULT_MSG, &prefix, String(&num));
+      Error (&msg);
+      Break;
+   When = %Attachment_DestSysFailedLogin
+      &msg = MsgGet(&c_.MESSAGE_CAT, &c_.BAD_LOGIN_MSG, &c_.DEFAULT_MSG, &prefix, String(&num));
+      Error (&msg);
+      Break;
+   When = %Attachment_FileNotFound
+      &msg = MsgGet(&c_.MESSAGE_CAT, &c_.FILE_NOT_FOUND_MSG, &c_.DEFAULT_MSG, &prefix, String(&num));
+      Error (&msg);
+      Break;
+   When = 21
+      &msg = MsgGet(&c_.MESSAGE_CAT, 10024, &c_.DEFAULT_MSG, &prefix, String(&num));
+      Error (&msg);
+      Break;
+   When = %Attachment_FileNameTooLong
+      &msg = MsgGet(&c_.MESSAGE_CAT, &c_.FILE_NAME_TOO_LONG, &c_.DEFAULT_MSG, &prefix, String(&num));
+      Error (&msg);
+      Break;
+   When = %Attachment_NoFileName
+      &msg = MsgGet(&c_.MESSAGE_CAT, &c_.NO_FILE_NAME, &c_.DEFAULT_MSG, &prefix, String(&num));
+      Error (&msg);
+      Break;
+   When = %Attachment_Success
+      Break;
+   When = %Attachment_Failed
+   When = %Attachment_FileTransferFailed
+   When-Other
+      &msg = MsgGet(&c_.MESSAGE_CAT, &c_.ATTACHMENT_FAILED_MSG, &c_.DEFAULT_MSG, &prefix, String(&num));
+      Error (&msg);
+      Break;
+   End-Evaluate;
+   
+end-method;
+
+
+set ConfirmationMessage
+   /+ &NewValue as String +/
+   SetConfirmationMessage(&NewValue);
+end-set;
+
+get ConfirmationMessage
+   /+ Returns String +/
+   Return GetLevel0()(1).PT_WORK.PT_CONFIRM_MSG.Value;
+end-get;
+
+
+method makePageDisplayOnly
+   /+ &pageName as String, +/
+   /+ &exclFlds as Array2 of String +/
+   
+   %This.makeRowsetDisplayOnly(GetLevel0(), "Y", &exclFlds);
+   
+end-method;
+
+
+method makeRowsetDisplayOnly
+   /+ &inRowset as Rowset, +/
+   /+ &include_child as String, +/
+   /+ &exclFlds as Array2 of String +/
+   
+   Local Rowset &child;
+   Local Record &rec;
+   Local Field &field;
+   Local integer &i, &j, &k;
+   
+   If &inRowset <> Null Then
+      
+      For &j = 1 To &inRowset.ActiveRowCount
+         
+         For &k = 1 To &inRowset(&j).RecordCount
+            &rec = &inRowset(&j).GetRecord(&k);
+            %This.makeRecordDisplayOnly(&rec, &exclFlds);
+         End-For;
+         
+         Evaluate &include_child
+         When = "Y"
+            rem --- display child rowsets ---;
+            For &i = 1 To &inRowset(&j).ChildCount
+               &child = &inRowset(&j).GetRowset(&i);
+               %This.makeRowsetDisplayOnly(&child, &include_child, &exclFlds);
+            End-For;
+            
+         End-Evaluate;
+         
+      End-For;
+      
+   End-If;
+   
+end-method;
+
+
+method makeRecordDisplayOnly
+   /+ &inRecord as Record, +/
+   /+ &exclFlds as Array2 of String +/
+   
+   Local Field &field;
+   Local integer &i, &j;
+   Local string &d, &val;
+   
+   If &inRecord <> Null Then
+      
+      Local number &pos = &exclFlds.Find(&inRecord.Name);
+      
+      If Not %This.excludedRecord(&inRecord.Name) Then
+         For &i = 1 To &inRecord.FieldCount
+            
+            &field = &inRecord.GetField(&i);
+            
+            If &field <> Null And
+                  &field.IsInBuf Then
+               
+               If &pos > 0 Then
+                  
+                  For &j = 2 To &exclFlds [&pos].Len
+                     If &exclFlds [&pos].Find(&field.Name) > 0 Then
+                     Else
+                        &field.DisplayOnly = True;
+                     End-If;
+                  End-For;
+                  
+               Else
+                  &field.DisplayOnly = True;
+               End-If;
+               
+            End-If;
+            
+         End-For;
+      End-If;
+      
+   End-If;
+   
+end-method;
+
+
+method excludedRecord
+   /+ &inRecord as String +/
+   /+ Returns Boolean +/
+   
+   Evaluate &inRecord
+   When = Record.PT_WORK
+   When = Record.PTLAYOUT
+   When = Record.PSSCWORDDEFN
+      Return True;
+   When-Other
+      Return False;
+   End-Evaluate;
+   
+end-method;
+
