@@ -1,0 +1,171 @@
+class PS_Query
+   method PS_Query(&sQryName As string);
+   method execute();
+   
+   property string Name;
+   property Record QryPromptRec;
+   
+   property number FieldCount get;
+   property number RowCount get;
+   
+   method getField(&uniqueName As string) Returns any;
+   method getRow(&rowNbr As number) Returns object;
+   
+private
+   
+   instance array of string &arrFldNames;
+   instance array of number &arrFldTypes;
+   instance array of array of string &arrFldValues;
+   
+   instance number &currRowNum;
+   
+end-class;
+
+method PS_Query
+   /+ &sQryName as String +/
+   
+   %This.Name = &sQryName;
+   
+   %This.arrFldNames = CreateArrayRept("", 0);
+   %This.arrFldTypes = CreateArrayRept(0, 0);
+   %This.arrFldValues = CreateArrayRept(CreateArrayRept("", 0), 0);
+   
+end-method;
+
+get FieldCount
+   /+ Returns Number +/
+   Return %This.arrFldNames.Len
+end-get;
+
+get RowCount
+   /+ Returns Number +/
+   Return %This.arrFldValues.Len
+end-get;
+
+method getRow
+   /+ &rowNbr as Number +/
+   /+ Returns Object +/
+   
+   If &rowNbr <= 0 Or
+         &rowNbr > %This.RowCount Then
+      Error "Invalid Row number for the Result set !";
+   End-If;
+   
+   %This.currRowNum = &rowNbr;
+   Return %This;
+   
+end-method;
+
+method getField
+   /+ &uniqueName as String +/
+   /+ Returns Any +/
+   
+   If %This.currRowNum = 0 Then
+      Error "The Query has not been executed";
+   End-If;
+   
+   Local number &pos;
+   
+   &pos = %This.arrFldNames.Find(&uniqueName);
+   
+   If &pos > 0 Then
+      
+      Local string &ValueString = %This.arrFldValues [%This.currRowNum][&pos];
+      
+      Evaluate %This.arrFldTypes [&pos]
+      When = 0 /* Char */
+      When = 1 /* Long Char */
+         Return &ValueString;
+         Break;
+      When = 2 /* "Number */
+      When = 3 /* "Signed */
+         Return Value(&ValueString);
+         Break;
+      When = 4 /* "DATE */
+         Return Date(&ValueString);
+         Break;
+      When = 5 /* "TIME */
+         Return Time(&ValueString);
+         Break;
+      When = 6 /* "DATE/TIME */
+      When >= 7 /* "IMAGE" or "FILE" or "ImageRef */
+         Break;
+      End-Evaluate;
+   End-If;
+   
+   Return Null;
+   
+end-method;
+
+method execute
+   
+   Local number &i, &j;
+   
+   Local Rowset &aRowSet;
+   Local Row &aRow;
+   Local Record &PromptRec;
+   Local Record &aRec;
+   Local ApiObject &aRunQry;
+   
+   &aRunQry = %Session.GetQuery();
+   
+   If (&aRunQry.Open(%This.Name, False, False) <> 0) Then
+      MessageBox(0, "", 0, 0, "Error in opening query: " | %This.Name);
+   Else
+      &PromptRec = &aRunQry.PromptRecord;
+      
+      rem %This.Name = &aRunQry.Name;
+      
+      If &PromptRec <> Null Then
+         If %This.QryPromptRec <> Null Then
+            %This.QryPromptRec.CopyFieldsTo(&PromptRec);
+         Else
+            Local boolean &nResult = Prompt(%This.Name | " Prompts", "", &PromptRec);
+         End-If;
+      End-If;
+      
+      &aRowSet = &aRunQry.RunToRowset(&PromptRec, 0);
+      
+      If &aRowSet <> Null Then
+         
+         &aRec = &aRowSet(1).GetRecord(1);
+         
+         Local ApiObject &QrySelOutputFldCol = &aRunQry.QuerySelect.QueryOutputFields;
+         
+         If &QrySelOutputFldCol <> Null Then
+            For &j = 1 To &QrySelOutputFldCol.count
+               rem Local string &strFldName = &QrySelOutputFldCol.Item(&j).HeadingUniqueFieldName;
+               Local string &strFldName = &QrySelOutputFldCol.Item(&j).Name;
+               %This.arrFldNames.Push(&strFldName);
+               
+               Local string &strFldType = &QrySelOutputFldCol.Item(&j).Type;
+               %This.arrFldTypes.Push(&strFldType);
+            End-For;
+         End-If;
+         
+         If &aRowSet.RowCount > 0 Then
+            For &i = 1 To &aRowSet.RowCount
+               &aRow = &aRowSet(&i);
+               Local array of string &arrRowValues = CreateArrayRept("", 0);
+               For &j = 1 To &aRow.GetRecord(1).FieldCount
+                  Local string &strFldVal = &aRow.GetRecord(1).GetField(&j).Value;
+                  &arrRowValues.Push(&strFldVal);
+               End-For;
+               %This.arrFldValues.Push(&arrRowValues);
+            End-For;
+         Else
+            MessageBox(0, "", 0, 0, "No records retrieved.");
+         End-If;
+         
+      Else
+         MessageBox(0, "", 0, 0, "Failed to retrieve result set.");
+      End-If;
+      
+   End-If;
+   
+   &arrFldValues.Pop();
+   
+   rem MessageBox(0, "", 0, 0, &arrFldNames.Join(",") | Char(10) | &arrFldValues.Join(","));
+   rem MessageBox(0, "", 0, 0, &arrFldTypes.Join(","));
+   
+end-method;
