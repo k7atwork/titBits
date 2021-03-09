@@ -11,7 +11,7 @@ function addHoverOverHelpText()
     var strAttr = arrElem[i].getAttribute('title');
     if (strAttr != null)
     {
-      if (arrElem[i].getAttribute('title') == 'Help')
+      if (arrElem[i].getAttribute('title').indexOf('Help') > -1)
       {
        switch (arrElem[i].parentNode.id)
        {
@@ -31,7 +31,7 @@ function convertText2Link()
 {
   var longmsgEle = document.getElementById('longmsg');
 
-  if ((longmsgEle.innerHTML.indexOf('&lt;') > 0) || (longmsgEle.innerHTML.indexOf('&gt;') > 0))
+  if ((longmsgEle.innerHTML.indexOf('&lt;') > -1) || (longmsgEle.innerHTML.indexOf('&gt;') > -1))
      longmsgEle.innerHTML = longmsgEle.innerHTML
                                                 .replace('&lt;','<')
                                                 .replace('&gt;','>');
