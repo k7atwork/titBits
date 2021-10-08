@@ -1,0 +1,20 @@
+/* Event Manager */
+import EOEN_MVC:EOEN_MODEL:EOENInterface;
+
+Local EOEN_MVC:EOEN_MODEL:EOENInterface &myEvent;
+Local Record &Rec, &recContext;
+
+/************************************************************/
+/*  Raise the event                                         */
+/************************************************************/
+
+&Rec = GetRecord();
+&myEvent = create EOEN_MVC:EOEN_MODEL:EOENInterface("", 0);
+
+/* We need to restrict the number of fields sent to the Event Manager (OS390 limitation) 
+    so we're sending a work record with just the key fields.  */
+&recContext = CreateRecord(Record.JOB_EM_WRK);
+&Rec.CopyFieldsTo(&recContext);
+
+&myEvent.AddContextRecord(&recContext);
+&myEvent.RaiseEvent("AssignmentAdded");
