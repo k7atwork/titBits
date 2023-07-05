@@ -1,0 +1,33 @@
+function convertText2HTML()
+{
+  var alertmsgEle = document.getElementById('alertmsg');
+  var popupTextEle = null;
+  for (var i = 0; i < alertmsgEle.childNodes.length; i++) {
+    if (alertmsgEle.childNodes[i].className == "popupText") {
+      popupTextEle = alertmsgEle.childNodes[i];
+      break;
+    }        
+  }
+
+//alert(popupTextEle.innerHTML);
+
+  if ((popupTextEle) && ((popupTextEle.innerHTML.indexOf('&lt;') > -1) || (popupTextEle.innerHTML.indexOf('&gt;') > -1)))
+  {
+     var popupTextEle_innerHTML = popupTextEle.innerHTML;
+//console.log(popupTextEle_innerHTML);
+     popupTextEle_innerHTML = popupTextEle_innerHTML
+                                                .replace('&lt;','<')
+                                                .replace('&gt;','>')
+                                                .replace('"','');
+
+     popupTextEle.innerHTML = popupTextEle_innerHTML;
+  }
+
+//alert(popupTextEle.innerHTML);
+//console.log(popupTextEle.innerHTML);
+  return;
+}
+
+// ----> Display Hyperlink for link in message <----
+var ModalWinEle = document.getElementById('pt_modals');
+ModalWinEle.addEventListener('DOMNodeInserted', convertText2HTML, false);
