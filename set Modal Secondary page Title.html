@@ -1,0 +1,23 @@
+// INC0851630, K7, 2023-11-13
+//  - set custom Modal Window Title
+
+function setModalTitle() {
+  var frameEl = window.frameElement; /* Get iFrame Element */
+
+  if (frameEl) {
+  var modTable = frameEl.parentElement.parentElement; /* Get Modal Window Parent Element */
+  var modHeader = modTable.getElementsByClassName("PSMODALHEADER")[0];
+  var modTitle = modHeader.getElementsByClassName("PSMODALTITLE")[0];
+  var modTitleText = modTitle.getElementsByClassName("PTPOPUP_TITLE")[0];
+
+  modTitleText.innerHTML = "%Bind(:1)";
+  }
+}
+
+if (document.readyState === "loading") {
+    // Loading hasn't finished yet
+    document.addEventListener("DOMContentLoaded", setModalTitle);
+} else {
+    // `DOMContentLoaded` has already fired
+    setModalTitle();
+}
